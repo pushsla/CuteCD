@@ -1,6 +1,6 @@
-# !/usr/bin/python3
-# --Advanced version of cd program. Use ccd --help
-#
+#!/usr/bin/python3
+#-- Advanced version of cd program. Use ccd --help
+
 import configparser
 from re import findall as refindall
 from os.path import join as osjoin
