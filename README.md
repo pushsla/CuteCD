@@ -44,7 +44,7 @@ Config options:
   * excluded_dirs -- dont search in these dirs. Syntax fullpath1:fullpath2...
   * exclude_pattern -- dont search in dirs with names matching pattern. Standart Python re syntax.
 
-### GO version (Outdated functionality)
+### GO version (**DEPRECATED and REMOVED**)
 **Synopsis**<br>
     ccd [DIR_NAME] [START_DIR] [KEYS]<br>
   in any order<br>
