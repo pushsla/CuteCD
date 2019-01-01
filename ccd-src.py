@@ -13,12 +13,12 @@ from os import path as ospath
 import sys
 
 def helpshow():
-    helptext = """    CuteCD Python. Another chdir verwion written with Python. Will find directory and make chdir to it for you.
-    If there will be more than one founded dir, you will be able to chose.
+    helptext = """    CuteCD Python. Another chdir version written with Python. Will find directory and make chdir to it for you.
+    If there will be more than one found dir, you will be able to chose.
     SYNOPSIS:
     \tccd [search name or pattern] [keys]
     KEYS:
-        -h -- help -? -- ? This help page
+        -h --help -? --? This help page
 
         -d\t\tset start search point. Default -- $HOME value
         -f\t\tmake chdir to the first found directory, will be no choice
@@ -136,7 +136,7 @@ def parseargs(args, env, config):
         :param args: list of keys and flags. Use os.argv
         :param env: dict of environment variables as dict. Use os.environ
     """
-    if sum(args.count(t) for t in ['-h', ' -- help', '-?', ' -- ?']) > 0:
+    if sum(args.count(t) for t in ['-h', ' --help', '-?', ' --?']) > 0:
         return True, None, None, None, None, None, None, None, None, None
 
     start_point = config['stp']
