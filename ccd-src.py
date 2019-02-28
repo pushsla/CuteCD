@@ -322,18 +322,19 @@ def key_default_reversed(x):
     global key_default
     return (-1)*key_default(x)
 
+try:
+    config = configure(sys.argv[1:], environ, 'ConfigVersion = v1.0')
 
-config = configure(sys.argv[1:], environ, 'ConfigVersion = v1.0')
+    (helppage, start_point,
+    search_point, end_at_first,
+    search_by_pattern, search_hidden,
+    recursion_limit, lowercase, excluded_dirs, exclude_pattern) = parseargs(sys.argv[1:], environ, config)
+    if helppage:
+        helpshow()
 
+    found_dirs = searchdepth(start_point, search_point, end_at_first,
+                             search_by_pattern, search_hidden, lowercase, excluded_dirs, exclude_pattern, False, recursion_limit)
 
-(helppage, start_point,
- search_point, end_at_first,
- search_by_pattern, search_hidden,
- recursion_limit, lowercase, excluded_dirs, exclude_pattern) = parseargs(sys.argv[1:], environ, config)
-if helppage:
-    helpshow()
-
-found_dirs = searchdepth(start_point, search_point, end_at_first,
-                         search_by_pattern, search_hidden, lowercase, excluded_dirs, exclude_pattern, False, recursion_limit)
-
-request_chdir(found_dirs, end_at_first, key_default_reversed)
+    request_chdir(found_dirs, end_at_first, key_default_reversed)
+except KeyboardInterrupt:
+    sys.exit(1)
