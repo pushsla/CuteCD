@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# -- Advanced version of cd program. Use ccd --help
+"""Advanced version of cd program. Use ccd --help."""
 
 import configparser
 import sys
@@ -16,6 +16,7 @@ from re import findall as refindall
 
 
 def helpshow():
+    """Show The Help Page."""
     helptext = """    CuteCD Python. Another chdir version written with Python.
     Will find directory and make chdir to it for you.
     If there will be more than one found dir, you will be able to chose.
@@ -41,7 +42,8 @@ def helpshow():
 
 def configure(args, env, actual_version):
     """
-    read config and apply program variables
+    Read config and apply program variables.
+
         :param args: list of keys ans flags. Use sys.argv
         :param env: dict of environment variables as dict. Use os.environ
         :param actual_version: str config version. Hard-coded in main. Needs to
@@ -143,7 +145,8 @@ def configure(args, env, actual_version):
 
 def parseargs(args, env, config):
     """
-    Parse cmd arguments stored in args
+    Parse cmd arguments stored in args.
+
         :param args: list of keys and flags. Use os.argv
         :param env: dict of environment variables as dict. Use os.environ
     """
@@ -232,7 +235,8 @@ def searchdepth(search_dir, search_point, end_at_first,
                 search_by_pattern, search_hidden, lowercase,
                 excluded_dirs, exclude_pattern, already_found, recursion):
     """
-    recursive function to depth search
+    Recursive function to depth search.
+
         :param search_dir: str destination directory name or pattern
         :param search_point: str directory where to search at this iteration
         :param end_at_first: bool will stop search at first found directory
@@ -297,7 +301,8 @@ def searchdepth(search_dir, search_point, end_at_first,
 
 def request_chdir(dir_list, end_at_first, key):
     """
-    make chdir to directories
+    Make chdir to directories.
+
         :param dir_list: list of found dirs to ask user in which to cd
         :param end_at_first: bool auto make cd in first dir without asking
         :param key: function sorting type
@@ -318,9 +323,9 @@ def request_chdir(dir_list, end_at_first, key):
         print("({}) {}".format(k, dir_list[k]))
 
     while True:
-        seq = input('Which do you need? (0): ')
+        seq = input('Which do you need? ({}): '.format(keys[-1]))
         if seq == '':
-            seq = 0
+            seq = keys[-1]
         else:
             try:
                 seq = int(seq)
@@ -339,17 +344,18 @@ def request_chdir(dir_list, end_at_first, key):
             continue
 
 
-def key_default(x):
+def key_default_reversed(x):
+    """
+    Sotring algorithm for request_chdir().
+
+    It sorts full directories paths for comfortable output, where
+        longer paths are moved into the beginning of the list.
+    """
     try:
-        hid_dep = len(x) - x.index('.')
+        hid_dep = len(x) - x.index('/.')
     except ValueError:
         hid_dep = 0
-    return x.count('/') + x.count('/.') * hid_dep
-
-
-def key_default_reversed(x):
-    global key_default
-    return (-1) * key_default(x)
+    return (-1) * (x.count('/') + x.count('/.') * hid_dep)
 
 
 try:
