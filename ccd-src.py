@@ -1,19 +1,23 @@
 #!/usr/bin/python3
-#-- Advanced version of cd program. Use ccd --help
+# -- Advanced version of cd program. Use ccd --help
 
 import configparser
-from re import findall as refindall
-from os.path import join as osjoin
-from os.path import isdir
-from os import listdir
-from os import environ
-from os import chdir
-from os import execl
-from os import path as ospath
 import sys
 
+from os import chdir
+from os import environ
+from os import execl
+from os import listdir
+
+from os.path import isdir
+from os.path import join as osjoin
+
+from re import findall as refindall
+
+
 def helpshow():
-    helptext = """    CuteCD Python. Another chdir version written with Python. Will find directory and make chdir to it for you.
+    helptext = """    CuteCD Python. Another chdir version written with Python.
+    Will find directory and make chdir to it for you.
     If there will be more than one found dir, you will be able to chose.
     SYNOPSIS:
     \tccd [search name or pattern] [keys]
@@ -22,14 +26,18 @@ def helpshow():
 
         -d\t\tset start search point. Default -- $HOME value
         -f\t\tmake chdir to the first found directory, will be no choice
-        -p\t\tinterpretate [name] as a regular search pattern. Default -- [name] must coincide with dir name.
+        -p\t\tinterpretate [name] as a regular search pattern.
+          \t\tDefault -- [name] must coincide with dir name.
         -l\t\tcase unsensitive search. Default -- case sensitive
         -a\t\tsearch in hidden directories. Default -- dont search in hidden
-        -r < value > \tset search depth limit. Do not set big values. Default -- 100
-        -c\t\tuse specified config. Default config stored in $HOME/.config/ccd.pycfg
+        -r < value > \tset search depth limit.
+                     \tDo not set big values. Default -- 100
+        -c\t\tuse specified config.
+          \t\tDefault config stored in $HOME/.config/ccd.pycfg
     """
     print(helptext)
     exit(0)
+
 
 def configure(args, env, actual_version):
     """
@@ -49,15 +57,14 @@ def configure(args, env, actual_version):
     excluded_dirs = "/dev:/run/udev:/proc:/sys"
     exclude_pattern = r"/\.*cache/*|/s*bin/*"
 
-
     if args.count('-c') == 0:
         config = "{}/.config/ccd.conf".format(env['HOME'])
-        #default_config = True
+        # default_config = True
         found_config = 0
     else:
         try:
-            config = args[args.index('-c')+1]
-            #default_config = False
+            config = args[args.index('-c') + 1]
+            # default_config = False
             found_config = 1
         except IndexError:
             print('Timid denial to read nameless config')
@@ -70,7 +77,7 @@ def configure(args, env, actual_version):
         except FileNotFoundError:
             config_exist = False
 
-        if not config_exist and found_config == 0 or current_version != actual_version:
+        if not ((config_exist and found_config == 0) or (current_version != actual_version)):
             print('Creating new config file')
             # try:
             #     os.mkdir("{}/.config/ccd.conf".format(env['HOME']))
@@ -97,16 +104,19 @@ def configure(args, env, actual_version):
             try:
                 start_point = cfgp.get("Defaults", "start_point")
                 # search_point = cfgp.get("Defaults", "search_point")
-                search_by_pattern = cfgp.get("Defaults", "search_by_pattern") == 'True'
-                search_hidden = cfgp.get("Defaults", "include_hidden_files") == 'True'
-                end_at_first = cfgp.get("Defaults", "search_til_first") == 'True'
+                search_by_pattern = cfgp.get(
+                    "Defaults", "search_by_pattern") == 'True'
+                search_hidden = cfgp.get(
+                    "Defaults", "include_hidden_files") == 'True'
+                end_at_first = cfgp.get(
+                    "Defaults", "search_til_first") == 'True'
                 recursion_limit = int(cfgp.get("Defaults", "max_depth"))
                 lowercase = cfgp.get("Defaults", "case_sensitive") == 'False'
                 excluded_dirs = cfgp.get("Rules", "excluded_dirs")
                 exclude_pattern = cfgp.get("Rules", "exclude_pattern")
             except configparser.NoSectionError:
-                raise FileNotFoundError('Invalid config file {}'.format(config))
-                # print("Timid denial to use invalid config file {}".format(config)
+                raise FileNotFoundError(
+                    'Invalid config file {}'.format(config))
                 # exit(1)
         # with open(config, 'r') as c:
             # values = c.read()
@@ -130,6 +140,7 @@ def configure(args, env, actual_version):
 
     return config
 
+
 def parseargs(args, env, config):
     """
     Parse cmd arguments stored in args
@@ -150,10 +161,7 @@ def parseargs(args, env, config):
     exclude_pattern = config['exp']
     found_config = config['fcf']
 
-
     found_search = False
-    #print(start_point, search_point, search_by_pattern, search_hidden, end_at_first, recursion_limit, lowercase)
-    #print(type(start_point), type(search_point), type(search_by_pattern), type(search_hidden), type(end_at_first), type(recursion_limit), type(lowercase))
 
     i = 0
     while i < len(args):
@@ -171,7 +179,7 @@ def parseargs(args, env, config):
                     i += 2
                     continue
                 else:
-                    print('Timid remark: config was been already specified by -c flag')
+                    print('Config was been already specified by -c flag')
                     exit(1)
             elif arg == '-f':
                 end_at_first = True
@@ -184,7 +192,8 @@ def parseargs(args, env, config):
                     recursion_limit = int(args[i + 1])
                     i += 2
                 except ValueError:
-                    print('Timid denial to use flag {} with value {}'.format(args[i], args[i+1]))
+                    print('Timid denial to use flag {} with value {}'.format(
+                        args[i], args[i + 1]))
                     exit(1)
                 continue
             elif arg == '-a':
@@ -207,12 +216,21 @@ def parseargs(args, env, config):
         print('Timid denial to find a nameless folder')
         exit(1)
 
-    return (False, start_point, search_point, end_at_first,
-            search_by_pattern, search_hidden, recursion_limit, lowercase, excluded_dirs, exclude_pattern)
+    return (False,
+            start_point,
+            search_point,
+            end_at_first,
+            search_by_pattern,
+            search_hidden,
+            recursion_limit,
+            lowercase,
+            excluded_dirs,
+            exclude_pattern)
 
 
 def searchdepth(search_dir, search_point, end_at_first,
-                search_by_pattern, search_hidden, lowercase, excluded_dirs, exclude_pattern, already_found, recursion):
+                search_by_pattern, search_hidden, lowercase,
+                excluded_dirs, exclude_pattern, already_found, recursion):
     """
     recursive function to depth search
         :param search_dir: str destination directory name or pattern
@@ -221,7 +239,7 @@ def searchdepth(search_dir, search_point, end_at_first,
         :param search_by_pattern: bool interprete search_dir ad pattern
         :param search_hidden: bool include also hidden files to search
         :param lowercase: bool same as case-sensitive
-        :param already_found: internal variable. If some dirs were already found
+        :param already_found: internal variable. Some dirs were already found
         :param recursion: internal variable. Need to set search depth limit
     """
     if (end_at_first and already_found) or (recursion <= 0):
@@ -230,12 +248,11 @@ def searchdepth(search_dir, search_point, end_at_first,
     e_d = excluded_dirs.split(':')
     try:
         dir_list = []
-        for f in listdir(path = search_dir):
+        for f in listdir(path=search_dir):
             path = osjoin(search_dir, f)
 
             if isdir(path) and (path not in e_d) and (len(refindall(exclude_pattern, path)) == 0):
                 dir_list.append(f)
-        # dir_list = [f for f in listdir(path = search_dir) if isdir(osjoin(search_dir, f)) and osjoin(search_dir, f) not in e_d]
     except PermissionError:
         return []
 
@@ -243,9 +260,11 @@ def searchdepth(search_dir, search_point, end_at_first,
         dir_list = [f for f in dir_list if f[0] != '.']
 
     if search_by_pattern and lowercase:
-        found_list = [f for f in dir_list if len(refindall(search_point.lower(), f.lower())) > 0]
+        found_list = [f for f in dir_list if len(
+            refindall(search_point.lower(), f.lower())) > 0]
     elif search_by_pattern:
-        found_list = [f for f in dir_list if len(refindall(search_point, f)) > 0]
+        found_list = [f for f in dir_list if len(
+            refindall(search_point, f)) > 0]
     elif lowercase:
         found_list = [f for f in dir_list if f.lower() == search_point.lower()]
     else:
@@ -261,8 +280,17 @@ def searchdepth(search_dir, search_point, end_at_first,
         already_found = True
 
     for d in dir_list:
-        found_list += searchdepth(osjoin(search_dir, d), search_point, end_at_first,
-                                  search_by_pattern, search_hidden, lowercase, excluded_dirs, exclude_pattern, already_found, recursion-1)
+        found_list += searchdepth(
+            osjoin(search_dir, d),
+            search_point,
+            end_at_first,
+            search_by_pattern,
+            search_hidden,
+            lowercase,
+            excluded_dirs,
+            exclude_pattern,
+            already_found,
+            recursion - 1)
 
     return [osjoin(search_dir, f) for f in found_list]
 
@@ -283,7 +311,7 @@ def request_chdir(dir_list, end_at_first, key):
         execl(environ['SHELL'], environ['SHELL'].split('/')[-1])
         exit(0)
 
-    dir_list = sorted(dir_list, key = key)
+    dir_list = sorted(dir_list, key=key)
     keys = list(range(len(dir_list)))
     # requests = dict(zip(keys, dir_list))
     for k in keys:
@@ -316,24 +344,42 @@ def key_default(x):
         hid_dep = len(x) - x.index('.')
     except ValueError:
         hid_dep = 0
-    return x.count('/') + x.count('/.')*hid_dep
+    return x.count('/') + x.count('/.') * hid_dep
+
 
 def key_default_reversed(x):
     global key_default
-    return (-1)*key_default(x)
+    return (-1) * key_default(x)
+
 
 try:
     config = configure(sys.argv[1:], environ, 'ConfigVersion = v1.0')
+    (
+        helppage,
+        start_point,
+        search_point,
+        end_at_first,
+        search_by_pattern,
+        search_hidden,
+        recursion_limit,
+        lowercase,
+        excluded_dirs,
+        exclude_pattern
+    ) = parseargs(sys.argv[1:], environ, config)
 
-    (helppage, start_point,
-    search_point, end_at_first,
-    search_by_pattern, search_hidden,
-    recursion_limit, lowercase, excluded_dirs, exclude_pattern) = parseargs(sys.argv[1:], environ, config)
     if helppage:
         helpshow()
 
-    found_dirs = searchdepth(start_point, search_point, end_at_first,
-                             search_by_pattern, search_hidden, lowercase, excluded_dirs, exclude_pattern, False, recursion_limit)
+    found_dirs = searchdepth(start_point,
+                             search_point,
+                             end_at_first,
+                             search_by_pattern,
+                             search_hidden,
+                             lowercase,
+                             excluded_dirs,
+                             exclude_pattern,
+                             False,
+                             recursion_limit)
 
     request_chdir(found_dirs, end_at_first, key_default_reversed)
 except KeyboardInterrupt:

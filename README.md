@@ -71,6 +71,5 @@ Config options:
   * will find dirs with names matching 'share' in / directory and give you choice where to cd<br>
 * ccd share -p /<br>
   * will find dirs with names matching '^.*share$' in / directory and give you choice where to cd<br>
-
 **Short demo**<br>
 <img src='https://i.imgur.com/TLr4Gzo.gif'/>
