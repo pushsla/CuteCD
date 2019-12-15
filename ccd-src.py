@@ -34,7 +34,7 @@ def helpshow():
         -r < value > \tset search depth limit.
                      \tDo not set big values. Default -- 100
         -c\t\tuse specified config.
-          \t\tDefault config stored in $HOME/.config/ccd.pycfg
+          \t\tDefault config stored in $HOME/.config/ccd.conf
     """
     print(helptext)
     exit(0)
@@ -59,6 +59,11 @@ def configure(args, env, actual_version):
     excluded_dirs = "/dev:/run/udev:/proc:/sys"
     exclude_pattern = r"/\.*cache/*|/s*bin/*"
 
+    config = ""
+    found_config = 0
+    config_exist = True
+    current_version = ''
+
     if args.count('-c') == 0:
         config = "{}/.config/ccd.conf".format(env['HOME'])
         # default_config = True
@@ -71,62 +76,62 @@ def configure(args, env, actual_version):
         except IndexError:
             print('Timid denial to read nameless config')
             exit(1)
+    # try:
     try:
-        try:
-            config_exist = True
-            with open(config, 'r') as c:
-                current_version = c.readlines()[-1][:-1]
-        except FileNotFoundError:
-            config_exist = False
+        config_exist = True
+        with open(config, 'r') as c:
+            current_version = c.readlines()[-1][:-1]
+    except FileNotFoundError:
+        config_exist = False
 
-        if not ((config_exist and found_config == 0) or (current_version != actual_version)):
-            print('Creating new config file')
-            # try:
-            #     os.mkdir("{}/.config/ccd.conf".format(env['HOME']))
-            # except FileExistsError:
-            #     pass
-            cfgp = configparser.ConfigParser()
-            cfgp.add_section("Defaults")
-            cfgp.set("Defaults", "start_point", start_point)
-            # cfgp.set("Defaults", "search_point", search_point)
-            cfgp.set("Defaults", "search_by_pattern", str(search_by_pattern))
-            cfgp.set("Defaults", "include_hidden_files", str(search_hidden))
-            cfgp.set("Defaults", "search_til_first", str(end_at_first))
-            cfgp.set("Defaults", "max_depth", str(recursion_limit))
-            cfgp.set("Defaults", "case_sensitive", str(not lowercase))
-            cfgp.add_section("Rules")
-            cfgp.set("Rules", "excluded_dirs", excluded_dirs)
-            cfgp.set("Rules", "exclude_pattern", exclude_pattern)
-            with open(config, 'w') as c:
-                cfgp.write(c)
-                c.write("\n{}\n".format(actual_version))
-        else:
-            cfgp = configparser.ConfigParser()
-            cfgp.read(config)
-            try:
-                start_point = cfgp.get("Defaults", "start_point")
-                # search_point = cfgp.get("Defaults", "search_point")
-                search_by_pattern = cfgp.get(
-                    "Defaults", "search_by_pattern") == 'True'
-                search_hidden = cfgp.get(
-                    "Defaults", "include_hidden_files") == 'True'
-                end_at_first = cfgp.get(
-                    "Defaults", "search_til_first") == 'True'
-                recursion_limit = int(cfgp.get("Defaults", "max_depth"))
-                lowercase = cfgp.get("Defaults", "case_sensitive") == 'False'
-                excluded_dirs = cfgp.get("Rules", "excluded_dirs")
-                exclude_pattern = cfgp.get("Rules", "exclude_pattern")
-            except configparser.NoSectionError:
-                raise FileNotFoundError(
-                    'Invalid config file {}'.format(config))
-                # exit(1)
+    if (not config_exist and found_config == 0) or (current_version != actual_version):
+        print('Creating new config file')
+        # try:
+        #     os.mkdir("{}/.config/ccd.conf".format(env['HOME']))
+        # except FileExistsError:
+        #     pass
+        cfgp = configparser.ConfigParser()
+        cfgp.add_section("Defaults")
+        cfgp.set("Defaults", "start_point", start_point)
+        # cfgp.set("Defaults", "search_point", search_point)
+        cfgp.set("Defaults", "search_by_pattern", str(search_by_pattern))
+        cfgp.set("Defaults", "include_hidden_files", str(search_hidden))
+        cfgp.set("Defaults", "search_til_first", str(end_at_first))
+        cfgp.set("Defaults", "max_depth", str(recursion_limit))
+        cfgp.set("Defaults", "case_sensitive", str(not lowercase))
+        cfgp.add_section("Rules")
+        cfgp.set("Rules", "excluded_dirs", excluded_dirs)
+        cfgp.set("Rules", "exclude_pattern", exclude_pattern)
+        with open(config, 'w') as c:
+            cfgp.write(c)
+            c.write("\n{}\n".format(actual_version))
+    else:
+        cfgp = configparser.ConfigParser()
+        cfgp.read(config)
+        try:
+            start_point = cfgp.get("Defaults", "start_point")
+            # search_point = cfgp.get("Defaults", "search_point")
+            search_by_pattern = cfgp.get(
+                "Defaults", "search_by_pattern") == 'True'
+            search_hidden = cfgp.get(
+                "Defaults", "include_hidden_files") == 'True'
+            end_at_first = cfgp.get(
+                "Defaults", "search_til_first") == 'True'
+            recursion_limit = int(cfgp.get("Defaults", "max_depth"))
+            lowercase = cfgp.get("Defaults", "case_sensitive") == 'False'
+            excluded_dirs = cfgp.get("Rules", "excluded_dirs")
+            exclude_pattern = cfgp.get("Rules", "exclude_pattern")
+        except configparser.NoSectionError:
+            raise FileNotFoundError(
+                'Invalid config file {}'.format(config))
+            # exit(1)
         # with open(config, 'r') as c:
             # values = c.read()
             # print(values)
             # HERE I MUST EXEC CONFIG VALUES!
-    except FileNotFoundError:
-        print('{} was not found. use defaults'.format(config))
-        found_config = 1
+    # except FileNotFoundError:
+    #    print('{} was not found. use defaults'.format(config))
+    #    found_config = 1
 
     config = {}
     config['stp'] = start_point
@@ -150,7 +155,7 @@ def parseargs(args, env, config):
         :param args: list of keys and flags. Use os.argv
         :param env: dict of environment variables as dict. Use os.environ
     """
-    if sum(args.count(t) for t in ['-h', ' --help', '-?', ' --?']) > 0:
+    if sum(args.count(t) for t in ['-h', '--help', '-?', '--?']) > 0:
         return True, None, None, None, None, None, None, None, None, None
 
     start_point = config['stp']
